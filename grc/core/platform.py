@@ -194,7 +194,7 @@ class Platform(Element):
 
         self._docstring_extractor.finish()
         # self._docstring_extractor.wait()
-        utils.hide_bokeh_gui_options_if_not_installed(self.blocks['options'])
+        utils.hide_bokeh_gui_options_if_not_installed(self.blocks.get('options'))
 
     def _iter_files_in_block_path(self, path=None, ext='yml'):
         """Iterator for block descriptions and category trees"""
@@ -373,14 +373,14 @@ class Platform(Element):
             fp.write(out)
 
     def get_generate_options(self):
-        for param in self.block_classes['options'].parameters_data:
-            if param.get('id') == 'generate_options':
-                break
-        else:
-            return []
-        generate_mode_default = param.get('default')
-        return [(value, name, value == generate_mode_default)
-                for value, name in zip(param['options'], param['option_labels'])]
+        options = self.block_classes.get('options') 
+        if hasattr(options, 'parameters_data'):
+            for param in options.parameters_data:
+                if param.get('id') == 'generate_options' and 'options' in param and 'option_labels' in param:
+                    generate_mode_default = param.get('default')
+                    return [(value, name, value == generate_mode_default) for value, name
+                            in zip(param['options'], param['option_labels'])]
+        return []
 
     def get_output_language(self):
         for param in self.block_classes['options'].parameters_data:
